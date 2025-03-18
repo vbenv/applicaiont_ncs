@@ -1,19 +1,25 @@
 import time
 
+def time_measure_decorator(f):
+    def wrapper(*args):
+        s = time.time()         # start
+        r = f(*args)            # function
+        e = time.time()         # end
+        print(e-s)
+        return r
+    return wrapper
+
+
+@time_measure_decorator
 def one_to_n_loop(n):           # O(n)
-    s = time.time()
     result = 0
     for i in range(1, n+1):
         result += i
-    e = time.time()
-    print(e-s)
     return result
 
+@time_measure_decorator
 def one_to_n_math(n):           # O(1)
-    s = time.time()
     r = n * (n + 1) // 2
-    e = time.time()
-    print(e-s)
     return r
 
 # 함수 실행
