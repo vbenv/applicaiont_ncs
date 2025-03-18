@@ -1,6 +1,6 @@
 drinks = ["Ice Americano", "Cafe Latte", "Watermelon Juice"]
 prices = [2000, 3000, 4900]
-amounts = [0, 0, 0]        # Order amounts, 0 : Ice Americano, 1 : Cafe Latte, 2 : Watermelon
+# amounts = [0, 0, 0]        # Order amounts, 0 : Ice Americano, 1 : Cafe Latte, 2 : Watermelon
 amounts = list()
 for _ in range(len(drinks)):
     amounts.append(0)
