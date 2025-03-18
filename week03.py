@@ -1,6 +1,9 @@
 drinks = ["Ice Americano", "Cafe Latte", "Watermelon Juice"]
 prices = [2000, 3000, 4900]
 amounts = [0, 0, 0]        # Order amounts, 0 : Ice Americano, 1 : Cafe Latte, 2 : Watermelon
+amounts = list()
+for _ in range(len(drinks)):
+    amounts.append(0)
 total_price = 0
 
 # 단일 책임의 원칙 -> print, total_price, amounts를 각각 나눠서 하는 것이 좋긴하나 간단한 예제이므로 합쳐서 진행
