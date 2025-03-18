@@ -1,4 +1,3 @@
-
 drinks = ["Ice Americano", "Cafe Latte", "Watermelon Juice"]
 prices = [2000, 3000, 4900]
 amounts = [0, 0, 0]        # Order amounts, 0 : Ice Americano, 1 : Cafe Latte, 2 : Watermelon
@@ -18,23 +17,19 @@ for k in range(len(drinks)):
     menu_lists += f'{k+1}) {drinks[k]} {prices[k]} won '
     
 while True:
-    menu = input(menu_lists + f"{len(drinks) + 1}) Exit : ")
-    if menu == "1":
-        order_process(int(menu) - 1)
-    elif menu == "2":
-        order_process(int(menu) - 1)
-    elif menu == "3":
-        order_process(int(menu) - 1)
-    elif menu == "4":
+    menu = int(input(menu_lists + f"{len(drinks) + 1}) Exit : "))
+    if len(drinks) >= menu >= 1:
+        order_process(menu - 1)
+    elif menu == (len(drinks)+1):
         print("Finish order~")
         break
     else:
         print(f"{menu} menu is not exist. please choose from above menu.")
 
 
-print("Product  Price  Amount  Subtotal")
+print("Product \tPrice\tAmount \tSubtotal")
 for i in range(len(drinks)):
     if amounts[i] > 0:
-        print(f"{drinks[i]} {prices[i]} x{amounts[i]} {prices[i] * amounts[i]}")
+        print(f"{drinks[i]}\t{prices[i]}\tx{amounts[i]}\t{prices[i] * amounts[i]}")
     
 print(f"Total price : {total_price}")
