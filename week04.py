@@ -2,6 +2,20 @@ drinks = ["Ice Americano", "Cafe Latte", "Watermelon Juice"]
 prices = [2000, 3000, 4900]
 amounts = [0] * len(drinks)
 total_price = 0
+DISCOUNT_THRESHOLD = 10000
+DISCOUNT_RATE = 0.1
+
+def apply_discount(price: int):
+    """
+    If the total amount exceeds a certain standard value, the price is returned reflecting the discount rate.
+    Args:
+        price (int): pre-discount price
+    Returns:
+        price (int): discount price
+    """
+    if price >= DISCOUNT_THRESHOLD:
+        return price * (1 - DISCOUNT_RATE)
+    return price
 
 # 단일 책임의 원칙 -> print, total_price, amounts를 각각 나눠서 하는 것이 좋긴하나 간단한 예제이므로 합쳐서 진행
 def order_process(idx: int):
@@ -18,8 +32,6 @@ def order_process(idx: int):
     amounts[idx] += 1
 
 menu_lists = "".join([f'{k+1}) {drinks[k]} {prices[k]} won ' for k in range(len(drinks))])
-
-help(order_process)
 
 while True:
     try:    
@@ -39,5 +51,15 @@ print("Product \tPrice\tAmount \tSubtotal")
 for i in range(len(drinks)):
     if amounts[i] > 0:
         print(f"{drinks[i]}\t{prices[i]}\tx{amounts[i]}\t{prices[i] * amounts[i]}won")
-    
-print(f"Total price : {total_price}")
+
+
+discounted_price = apply_discount(total_price)    
+discount_amount = total_price - discounted_price
+print(f"Original price : {total_price}won")
+
+if discount_amount > 0:
+    print(f"discount amount : {discount_amount}won")
+    print(f"Total price after discount : {discounted_price}won")
+else:
+    print("The discount has not been applied")
+    print(f"Total price : {total_price}won")
