@@ -61,16 +61,10 @@ class OrderProcessor:
     DISCOUNT_THRESHOLD = 10000
     DISCOUNT_RATE = 0.1
 
-    def __init__(self, drinks: List[str], prices: List[int]):
-        """
-        Initialization method for the OrderProcessor class.
-        :param drinks: beverage name list
-        :param prices: beverage price list
-        """
-        # Composition: OrderProcessor 객체가 Menu 객체를 생성하고 관리함
-        self.menu = Menu(drinks, prices)
-        self.amounts = [0] * self.menu.get_menu_length()
+    def __init__(self):
+        """Initialization method for the OrderProcessor class."""
         self.total_price = 0
+        self.amounts = []  # 메뉴 항목 수에 따라 초기화될 예정
 
     def apply_discount(self, price: int) -> float:
         """
@@ -82,27 +76,28 @@ class OrderProcessor:
             return price * (1 - self.DISCOUNT_RATE)
         return price
 
-    def process_order(self, idx: int) -> None:
+    def process_order(self, menu: Menu, idx: int) -> None:
         """
         Process the order and accumulate the total price
+        :param menu: Menu object (dependency)
         :param idx: index of the ordered drink
         """
-        drink_name = self.menu.get_drink_name(idx)
-        drink_price = self.menu.get_price(idx)
+        drink_name = menu.get_drink_name(idx)
+        drink_price = menu.get_price(idx)
 
         print(f"{drink_name} ordered. Price: {drink_price} won")
         self.total_price += drink_price
         self.amounts[idx] += 1
 
-    def print_receipt(self) -> None:
+    def print_receipt(self, menu: Menu) -> None:
         """Print order summary and final price with formatted alignment using f-string"""
         print(f"\n{'Product':<15} {'Price':<10} {'Amount':<10} {'Subtotal':<10}")
         print("-" * 50)
 
-        for i in range(self.menu.get_menu_length()):
+        for i in range(menu.get_menu_length()):
             if self.amounts[i] > 0:
-                drink_name = self.menu.get_drink_name(i)
-                drink_price = self.menu.get_price(i)
+                drink_name = menu.get_drink_name(i)
+                drink_price = menu.get_price(i)
 
                 print(
                     f"{drink_name:<15} {drink_price:<10} {self.amounts[i]:<10} {drink_price * self.amounts[i]:<10}")
@@ -119,26 +114,27 @@ class OrderProcessor:
             print(f"{'No discount applied.':<30}")
             print(f"{'Total price:':<30} {self.total_price:>5}")
 
-    def run(self):
+    def run(self, menu: Menu):
         """Execute the order system"""
+        self.amounts = [0] * menu.get_menu_length() # run 시점에 메뉴 길이에 맞춰 초기화
 
         while True:
             try:
-                menu_display = self.menu.display_menu()
-                menu = int(input(menu_display))
-                if 1 <= menu <= self.menu.get_menu_length():
-                    self.process_order(menu - 1)
-                elif menu == self.menu.get_menu_length() + 1:
+                menu_display = menu.display_menu()
+                choice = int(input(menu_display))
+                if 1 <= choice <= menu.get_menu_length():
+                    self.process_order(menu, choice - 1)
+                elif choice == menu.get_menu_length() + 1:
                     print("Order finished~")
                     break
                 else:
-                    print(f"Menu {menu} is invalid. Please choose from the above menu.")
+                    print(f"Menu {choice} is invalid. Please choose from the above menu.")
             except ValueError:
                 print("Please enter a valid number. Try again.")
             except IndexError as e:
                 print(e)  # Display the specific IndexError message
 
-        self.print_receipt()
+        self.print_receipt(menu)
 
 
 if __name__ == "__main__":
@@ -146,5 +142,5 @@ if __name__ == "__main__":
     menu_prices = [2000, 3000, 4900]
 
     menu = Menu(menu_drinks, menu_prices)
-    order_processor = OrderProcessor(menu)
-    order_processor.run()
+    order_processor = OrderProcessor() # Menu 객체를 생성하지 않음
+    order_processor.run(menu) # run 메서드에 Menu 객체를 전달
