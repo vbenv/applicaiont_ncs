@@ -1,120 +1,95 @@
-# Not Suggestion version
 class Pokemon:
-    """모든 포켓몬의 기본 클래스"""
-
-    def __init__(self, name, level=1, hp=100):
+    def __init__(self, name, type):
         self.name = name
-        self.level = level
-        self.hp = hp
-        self.type = "Normal"
+        self.type = type
+        self.health = 100  # Basic health
 
-    def attack(self):
-        print(f"{self.name}이(가) 공격합니다!")
+    def attack(self, target, skill):
+        print(f"{self.name} uses {skill} on {target.name}!")
+        target.health -= 20  # Arbitrary damage
+        print(f"{target.name}'s health: {target.health}")
+        if target.health <= 0:
+            print(f"{target.name} fainted!")
 
-    def make_sound(self):
-        print(f"{self.name}이(가) 소리를 냅니다!")
-
-    def level_up(self):
-        self.level += 1
-        self.hp += 10
-        print(f"{self.name}이(가) 레벨 {self.level}이(가) 되었습니다!")
-
-
-class Flyable:
-    """날 수 있는 능력을 가진 클래스"""
-
-    def fly(self):
-        print(f"{self.name}이(가) 날아오릅니다!")
-
-    def land(self):
-        print(f"{self.name}이(가) 착륙합니다!")
-
-
-class Wings:
-    """날개를 가진 객체를 표현하는 클래스"""
-
-    def __init__(self, wingspan=1.0):
-        self.wingspan = wingspan
-
-    def flap(self):
-        print(f"날개를 펄럭입니다! (날개 폭: {self.wingspan}m)")
-
-
-class Balloon:
-    """풍선을 가진 객체를 표현하는 클래스"""
-
-    def __init__(self, color="빨간색"):
-        self.color = color
-
-    def inflate(self):
-        print(f"{self.color} 풍선이 부풀어 오릅니다!")
-
-    def deflate(self):
-        print(f"{self.color} 풍선이 수축합니다!")
-
+    def __str__(self):
+        return f"{self.name} ({self.type} type, Health: {self.health})"
 
 class Pikachu(Pokemon):
-    """피카츄 클래스"""
+    def __init__(self):
+        super().__init__("Pikachu", "Electric")
 
-    def __init__(self, name="피카츄", level=1, hp=100):
-        super().__init__(name, level, hp)
-        self.type = "Electric"
+    def thunderbolt(self, target):
+        print("Pikachu Thunderbolt!!!")
+        self.attack(target, "Thunderbolt")
 
-    def make_sound(self):
-        print("피카피카!")
+class Charizard(Pokemon):
+    def __init__(self):
+        super().__init__("Charizard", "Fire/Flying")
 
-    def thunder_shock(self):
-        print(f"{self.name}이(가) 전기 충격을 발사합니다!")
+    def flamethrower(self, target):
+        print("Charizard Flamethrower!!!")
+        self.attack(target, "Flamethrower")
 
-
-class Charizard(Pokemon, Flyable):
-    """리자몽 클래스"""
-
-    def __init__(self, name="리자몽", level=36, hp=200):
-        Pokemon.__init__(self, name, level, hp)
-        self.type = "Fire/Flying"
-        self.wings = Wings(wingspan=2.5)  # 합성 관계
-
-    def make_sound(self):
-        print("그아아아!")
+# Flyable Interface (Mixin) - Represents the ability to fly
+class Flyable:
+    def __init__(self):
+        self.is_flying = False
 
     def fly(self):
-        print(f"{self.name}이(가) 하늘 높이 날아오릅니다!")
-        self.wings.flap()
-
-    def flamethrower(self):
-        print(f"{self.name}이(가) 화염방사를 합니다!")
-
-
-class FlyingPikachu(Pikachu, Flyable):
-    """날아다니는 피카츄 클래스"""
-
-    def __init__(self, name="날아다니는 피카츄", level=15, hp=120):
-        Pikachu.__init__(self, name, level, hp)
-        self.balloon = Balloon(color="노란색")  # 합성 관계
-
-    def fly(self):
-        print(f"{self.name}이(가) 풍선을 타고 하늘을 날아갑니다!")
-        self.balloon.inflate()
+        if hasattr(self, 'wings') or hasattr(self, 'balloon'):  # Needs wings or a balloon to fly
+            print(f"{self.__class__.__name__} takes to the skies!")
+            self.is_flying = True
+        else:
+            print(f"{self.__class__.__name__} cannot fly.")
 
     def land(self):
-        print(f"{self.name}이(가) 땅으로 내려옵니다.")
-        self.balloon.deflate()
+        print(f"{self.__class__.__name__} lands.")
+        self.is_flying = False
 
+# Wings Class
+class Wings:
+    def __init__(self, kind="Normal Wings"):
+        self.kind = kind
+        print(f"{self.__class__.__name__} created ({self.kind})")
 
-# 예제 사용
-if __name__ == "__main__":
-    pika = Pikachu(level=10)
-    pika.make_sound()
-    pika.thunder_shock()
+# Balloon Class
+class Balloon:
+    def __init__(self, color="Red"):
+        self.color = color
+        print(f"{self.__class__.__name__} created ({self.color})")
 
-    charizard = Charizard()
-    charizard.attack()
-    charizard.fly()
-    charizard.flamethrower()
+# Flyable and Wings inheriting class (Charizard with wings)
+class WingedCharizard(Charizard, Flyable):
+    def __init__(self):
+        Charizard.__init__(self)
+        Flyable.__init__(self)
+        self.wings = Wings("Steel Wings")  # Composition: Has a Wings object as a property
 
-    flying_pika = FlyingPikachu()
-    flying_pika.make_sound()
-    flying_pika.fly()
-    flying_pika.thunder_shock()
-    flying_pika.land()
+# Flyable and Balloon inheriting class (Pikachu with balloon)
+class BalloonPikachu(Pikachu, Flyable):
+    def __init__(self):
+        Pikachu.__init__(self)
+        Flyable.__init__(self)
+        self.balloon = Balloon("Yellow")  # Composition: Has a Balloon object as a property
+
+# Usage Example
+pikachu = Pikachu()
+charizard = Charizard()
+winged_charizard = WingedCharizard()
+balloon_pikachu = BalloonPikachu()
+
+print(pikachu)
+print(charizard)
+print(winged_charizard)
+print(balloon_pikachu)
+
+pikachu.thunderbolt(charizard)
+charizard.flamethrower(pikachu)
+
+winged_charizard.fly()
+winged_charizard.flamethrower(pikachu)
+winged_charizard.land()
+
+balloon_pikachu.fly()
+balloon_pikachu.thunderbolt(charizard)
+balloon_pikachu.land()
