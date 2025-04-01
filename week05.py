@@ -1,95 +1,148 @@
-class Pokemon:
-    def __init__(self, name, type):
-        self.name = name
-        self.type = type
-        self.health = 100  # Basic health
+from typing import List  # type hint
 
-    def attack(self, target, skill):
-        print(f"{self.name} uses {skill} on {target.name}!")
-        target.health -= 20  # Arbitrary damage
-        print(f"{target.name}'s health: {target.health}")
-        if target.health <= 0:
-            print(f"{target.name} fainted!")
+class Menu:
+    """Represents the cafe menu."""
 
-    def __str__(self):
-        return f"{self.name} ({self.type} type, Health: {self.health})"
+    def __init__(self, drinks: List[str], prices: List[int]):
+        """
+        Initialization method for the Menu class.
+        :param drinks: beverage name list
+        :param prices: beverage price list
+        """
+        if len(drinks) != len(prices):
+            raise ValueError("Drinks and prices lists must have the same length.")
 
-class Pikachu(Pokemon):
-    def __init__(self):
-        super().__init__("Pikachu", "Electric")
+        self.drinks = drinks
+        self.prices = prices
 
-    def thunderbolt(self, target):
-        print("Pikachu Thunderbolt!!!")
-        self.attack(target, "Thunderbolt")
+    def display_menu(self) -> str:
+        """
+        Generate a dynamic menu string
+        :return: formatted menu string
+        """
+        return "".join(
+            [f"{k + 1}) {self.drinks[k]} {self.prices[k]} won  "
+             for k in range(len(self.drinks))]
+        ) + f"{len(self.drinks) + 1}) Exit : "
 
-class Charizard(Pokemon):
-    def __init__(self):
-        super().__init__("Charizard", "Fire/Flying")
-
-    def flamethrower(self, target):
-        print("Charizard Flamethrower!!!")
-        self.attack(target, "Flamethrower")
-
-# Flyable Interface (Mixin) - Represents the ability to fly
-class Flyable:
-    def __init__(self):
-        self.is_flying = False
-
-    def fly(self):
-        if hasattr(self, 'wings') or hasattr(self, 'balloon'):  # Needs wings or a balloon to fly
-            print(f"{self.__class__.__name__} takes to the skies!")
-            self.is_flying = True
+    def get_price(self, idx: int) -> int:
+        """
+        Get the price of a drink at a given index.
+        :param idx: index of the drink
+        :return: price of the drink
+        """
+        if 0 <= idx < len(self.prices):
+            return self.prices[idx]
         else:
-            print(f"{self.__class__.__name__} cannot fly.")
+            raise IndexError("Invalid menu index.")
 
-    def land(self):
-        print(f"{self.__class__.__name__} lands.")
-        self.is_flying = False
+    def get_drink_name(self, idx: int) -> str:
+        """
+        Get the name of a drink at a given index.
+        :param idx: index of the drink
+        :return: name of the drink
+        """
+        if 0 <= idx < len(self.drinks):
+            return self.drinks[idx]
+        else:
+            raise IndexError("Invalid menu index.")
 
-# Wings Class
-class Wings:
-    def __init__(self, kind="Normal Wings"):
-        self.kind = kind
-        print(f"{self.__class__.__name__} created ({self.kind})")
+    def get_menu_length(self) -> int:
+        """
+        Get the number of items on the menu.
+        :return: the length of the menu
+        """
+        return len(self.drinks)
 
-# Balloon Class
-class Balloon:
-    def __init__(self, color="Red"):
-        self.color = color
-        print(f"{self.__class__.__name__} created ({self.color})")
 
-# Flyable and Wings inheriting class (Charizard with wings)
-class WingedCharizard(Charizard, Flyable):
-    def __init__(self):
-        Charizard.__init__(self)
-        Flyable.__init__(self)
-        self.wings = Wings("Steel Wings")  # Composition: Has a Wings object as a property
+class OrderProcessor:
+    """Processes cafe orders, applies discounts, and prints receipts."""
 
-# Flyable and Balloon inheriting class (Pikachu with balloon)
-class BalloonPikachu(Pikachu, Flyable):
-    def __init__(self):
-        Pikachu.__init__(self)
-        Flyable.__init__(self)
-        self.balloon = Balloon("Yellow")  # Composition: Has a Balloon object as a property
+    DISCOUNT_THRESHOLD = 10000
+    DISCOUNT_RATE = 0.1
 
-# Usage Example
-pikachu = Pikachu()
-charizard = Charizard()
-winged_charizard = WingedCharizard()
-balloon_pikachu = BalloonPikachu()
+    def __init__(self, menu: Menu):
+        """
+        Initialization method for the OrderProcessor class.
+        :param menu: An instance of the Menu class.
+        """
+        self.menu = menu
+        self.amounts = [0] * menu.get_menu_length()
+        self.total_price = 0
 
-print(pikachu)
-print(charizard)
-print(winged_charizard)
-print(balloon_pikachu)
+    def apply_discount(self, price: int) -> float:
+        """
+        Apply discount rate when the total amount exceeds a certain threshold
+        :param price: price before discount
+        :return: price after discount
+        """
+        if price >= self.DISCOUNT_THRESHOLD:
+            return price * (1 - self.DISCOUNT_RATE)
+        return price
 
-pikachu.thunderbolt(charizard)
-charizard.flamethrower(pikachu)
+    def process_order(self, idx: int) -> None:
+        """
+        Process the order and accumulate the total price
+        :param idx: index of the ordered drink
+        """
+        drink_name = self.menu.get_drink_name(idx)
+        drink_price = self.menu.get_price(idx)
 
-winged_charizard.fly()
-winged_charizard.flamethrower(pikachu)
-winged_charizard.land()
+        print(f"{drink_name} ordered. Price: {drink_price} won")
+        self.total_price += drink_price
+        self.amounts[idx] += 1
 
-balloon_pikachu.fly()
-balloon_pikachu.thunderbolt(charizard)
-balloon_pikachu.land()
+    def print_receipt(self) -> None:
+        """Print order summary and final price with formatted alignment using f-string"""
+        print(f"\n{'Product':<15} {'Price':<10} {'Amount':<10} {'Subtotal':<10}")
+        print("-" * 50)
+
+        for i in range(self.menu.get_menu_length()):
+            if self.amounts[i] > 0:
+                drink_name = self.menu.get_drink_name(i)
+                drink_price = self.menu.get_price(i)
+
+                print(
+                    f"{drink_name:<15} {drink_price:<10} {self.amounts[i]:<10} {drink_price * self.amounts[i]:<10}")
+
+        discounted_price = self.apply_discount(self.total_price)
+        discount = self.total_price - discounted_price
+
+        print("-" * 50)
+        print(f"{'Total price before discount:':<30} {self.total_price:>5}")
+        if discount > 0:
+            print(f"{'Discount amount:':<30} {discount:<10.0f}")
+            print(f"{'Total price after discount:':<30} {discounted_price:<10.0f}")
+        else:
+            print(f"{'No discount applied.':<30}")
+            print(f"{'Total price:':<30} {self.total_price:>5}")
+
+    def run(self):
+        """Execute the order system"""
+
+        while True:
+            try:
+                menu_display = self.menu.display_menu()
+                menu = int(input(menu_display))
+                if 1 <= menu <= self.menu.get_menu_length():
+                    self.process_order(menu - 1)
+                elif menu == self.menu.get_menu_length() + 1:
+                    print("Order finished~")
+                    break
+                else:
+                    print(f"Menu {menu} is invalid. Please choose from the above menu.")
+            except ValueError:
+                print("Please enter a valid number. Try again.")
+            except IndexError as e:
+                print(e)  # Display the specific IndexError message
+
+        self.print_receipt()
+
+
+if __name__ == "__main__":
+    menu_drinks = ["Ice Americano", "Cafe Latte", "Watermelon Juice"]
+    menu_prices = [2000, 3000, 4900]
+
+    menu = Menu(menu_drinks, menu_prices)
+    order_processor = OrderProcessor(menu)
+    order_processor.run()
