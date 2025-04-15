@@ -141,7 +141,8 @@ class OrderProcessor:
             self.cur.execute('insert into ticket (number) values (?)',  (number,))
         else:
             number = res[0] + 1
-            self.cur.execute('insert into ticket (number) values (?)',  (number,))
+            # insert -> stack log's data and db memory, It's not good so change to update
+            self.cur.execute('update ticket set number = ? where id = (select id from ticket order by id desc limit 1)', (number,))
         
         self.conn.commit()
         return number
