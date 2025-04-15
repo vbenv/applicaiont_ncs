@@ -1,5 +1,5 @@
 from typing import List  # type hint
-
+import sqlite3
 
 class Menu:
     """Represents the cafe menu."""
@@ -70,7 +70,18 @@ class OrderProcessor:
         self.menu = menu
         self.amounts = [0] * menu.get_menu_length()
         self.total_price = 0
-
+        
+        ####### DB ######
+        self.conn = sqlite3.connect('order_number.db')
+        self.cur = self.conn.cursor
+        self.cur = self.conn.execute('''
+            create table if not exists ticket   ( id integer primary key autoincrement,
+            number integer not null)                            
+        ''')
+        
+        self.conn.commit()
+        
+        
     def apply_discount(self, price: int) -> float:
         """
         Apply discount rate when the total amount exceeds a certain threshold
@@ -117,22 +128,22 @@ class OrderProcessor:
             print(f"{'No discount applied.':<30}")
             print(f"{'Total price:':<30} {self.total_price:>5} won")
 
-
     def get_next_ticket_number(self) -> int:
         """
-        Function that Produce next ticket number
+        Function that Produce next ticket number (DB version)
         :return: next ticket number
         """
-        try:
-            with open("ticket_number.txt", "r") as fp:
-                number = int(fp.read())
-        except FileNotFoundError as err:
-            number = 0
-            
-        number = number + 1
-        with open("ticket_number.txt", "w") as fp:
-            fp.write(str(number))
-
+        self.cur.execute('select number from ticket order by number desc limit 1')  # choose biggest number
+        res = self.cur.fetchone()
+        
+        if res is None:
+            number = 1
+            self.cur.execute('insert into ticket (number) values (?)',  (number,))
+        else:
+            number = res[0] + 1
+            self.cur.execute('insert into ticket (number) values (?)',  (number,))
+        
+        self.conn.commit()
         return number
 
 
@@ -160,6 +171,6 @@ class OrderProcessor:
         print(f"numer : {self.get_next_ticket_number()}")
         
     def __del__(self):
-        # db conection close
         print('End program')
+        self.conn.close()   # db connection close
         

@@ -6,6 +6,12 @@
 temp.py
 temp.db
 test.db
+sqldiff
+sqlite3
+sqlite3_analyzer
+sqlite3_rsync
+.vscode/
+
 
 mymodule.py
 ### macOS ###
