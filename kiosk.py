@@ -158,3 +158,8 @@ class OrderProcessor:
 
         self.print_receipt()
         print(f"numer : {self.get_next_ticket_number()}")
+        
+    def __del__(self):
+        # db conection close
+        print('End program')
+        
