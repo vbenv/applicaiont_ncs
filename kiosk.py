@@ -255,7 +255,7 @@ class KioskGUI:
             pady=5,
             command=self.reset_order
         )
-        reset_btn.grid(row=0, column=1, padx=5, pady=5)
+        reset_btn.grid(row=0, column=3, padx=5, pady=5)
 
         # Exit button
         exit_btn = tk.Button(
@@ -271,18 +271,32 @@ class KioskGUI:
         exit_btn.grid(row=0, column=2, padx=5, pady=5)
 
          # Weather label
-        weather_label = tk.Label(
+        self.weather_label = tk.Label(
             self.root,
             text="Loading weather information...",
             font=("Arial", 12),
             bg="#f0f0f0"
         )
-        weather_label.grid(row=3, column=0, pady=5)
+        self.weather_label.grid(row=3, column=0, columnspan=2, pady=5)
 
         # Configure grid weights for responsiveness
         self.root.grid_rowconfigure(1, weight=1)
         self.root.grid_columnconfigure(0, weight=1)
         self.root.grid_columnconfigure(1, weight=1)
+
+    def update_weather_info(self) -> None:
+        """ Load weather data from 'wttr.in'"""
+        # url = "https://wttr.in/incheon?&0&Q"
+        url = "https://wttr.in/incheon?format=4"
+        # url = "https://naver.com/kim"  # 404
+        # url = "https://wttr123.in/incheon?format=4"
+        response = requests.get(url)
+        weather_text = response.text.strip()
+        if response.status_code == 200:
+            self.weather_label.config(text=f"Current weather ({weather_text})")
+        else:
+            self.weather_label.config(text=f"Weather information cannot be loaded. (Status code : {response.status_code})")
+
 
     def add_to_order(self, idx: int) -> None:
         """
@@ -291,6 +305,7 @@ class KioskGUI:
         """
         self.order_processor.process_order(idx)
         self.update_order_display()
+        self.update_weather_info()  # 추가 주문 시 날씨 정보 로딩
 
     def update_order_display(self) -> None:
         """Update the order summary in the text widget"""
@@ -372,6 +387,7 @@ class KioskGUI:
         self.order_processor = OrderProcessor(self.menu)
         # Update display
         self.update_order_display()
+        
 
     def exit_program(self) -> None:
         """Exit the program"""
