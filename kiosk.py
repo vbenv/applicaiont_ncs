@@ -3,7 +3,7 @@ from tkinter import messagebox
 import sqlite3
 from typing import List
 from datetime import datetime
-
+import requests
 
 class Menu:
     """Represents the cafe menu."""
@@ -269,6 +269,15 @@ class KioskGUI:
             command=self.exit_program
         )
         exit_btn.grid(row=0, column=2, padx=5, pady=5)
+
+         # Weather label
+        weather_label = tk.Label(
+            self.root,
+            text="Loading weather information...",
+            font=("Arial", 12),
+            bg="#f0f0f0"
+        )
+        weather_label.grid(row=3, column=0, pady=5)
 
         # Configure grid weights for responsiveness
         self.root.grid_rowconfigure(1, weight=1)
