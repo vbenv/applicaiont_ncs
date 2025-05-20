@@ -287,16 +287,21 @@ class KioskGUI:
     def update_weather_info(self) -> None:
         """ Load weather data from 'wttr.in'"""
         # url = "https://wttr.in/incheon?&0&Q"
-        url = "https://wttr.in/incheon?format=4"
+        # url = "https://wttr.in/incheon?format=4"  # ok
         # url = "https://naver.com/kim"  # 404
-        # url = "https://wttr123.in/incheon?format=4"
-        response = requests.get(url)
-        weather_text = response.text.strip()
-        if response.status_code == 200:
-            self.weather_label.config(text=f"Current weather ({weather_text})")
-        else:
-            self.weather_label.config(text=f"Weather information cannot be loaded. (Status code : {response.status_code})")
-
+        url = "https://wttr123.in/incheon?format=4"  # exception occur
+        # url = "https://www.nate.com"
+        try:
+            response = requests.get(url)  # exception occur
+            weather_text = response.text.strip()
+            if response.status_code == 200:
+                self.weather_label.config(text=f"Current weather ({weather_text})")
+            else:
+                self.weather_label.config(text=f"Weather information cannot be loaded. (Status code : {response.status_code})")
+        except Exception as err:
+            self.weather_label.config(text=f"Weather information error\n{err}")
+            # messagebox.showerror("Error", f"Weather information error\n{err}")
+            # print(err)
 
     def add_to_order(self, idx: int) -> None:
         """
@@ -305,7 +310,7 @@ class KioskGUI:
         """
         self.order_processor.process_order(idx)
         self.update_order_display()
-        self.update_weather_info()  # 추가 주문 시 날씨 정보 로딩
+        self.update_weather_info()  # Load weather data
 
     def update_order_display(self) -> None:
         """Update the order summary in the text widget"""
