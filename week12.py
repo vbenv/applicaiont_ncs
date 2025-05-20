@@ -9,8 +9,8 @@ if __name__ == "__main__":
     # else:
     #     print(f"상태 코드 : {response.status_code}")
 
-    menu_drinks = ["Ice Americano", "Cafe Latte", "Watermelon Juice", "Ice tea", "A"]
-    menu_prices = [2000, 3000, 4900, 3500, 1]
+    menu_drinks = ["Ice Americano", "Cafe Latte", "Watermelon Juice", "Ice tea"]
+    menu_prices = [2000, 3000, 4900, 3500]
 
     root = tk.Tk()
     app = KioskGUI(root, menu_drinks, menu_prices)
