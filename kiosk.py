@@ -168,12 +168,16 @@ class OrderProcessor:
         self.conn.close()  # db connection close ....
 
 
+
+class WeatherManager:
+    pass
+
 class KioskGUI:
     def __init__(self, root: tk.Tk, menu_drinks: List[str], menu_prices: List[int]) -> None:
         self.root = root
         self.root.title("Cafe Kiosk")
-        self.root.geometry("800x600")
-        self.root.configure(bg="#f0f0f0")
+        self.root.geometry("900x700")
+        self.root.configure(bg="#FFFFFF")  # macOS 스타일의 깨끗한 흰색 배경
 
         # Initialize menu and order processor
         self.menu = Menu(menu_drinks, menu_prices)
@@ -181,21 +185,24 @@ class KioskGUI:
 
         # Create UI components
         self.create_widgets()
+        
+        # Initializer weather manager
+        
 
     def create_widgets(self) -> None:
         """Create and initialize all GUI widgets"""
         # Title frame
-        title_frame = tk.Frame(self.root, bg="#4a7abc", padx=10, pady=10)
+        title_frame = tk.Frame(self.root, bg="#007AFF", padx=15, pady=15)  # Apple 블루 컬러
         title_frame.grid(row=0, column=0, columnspan=3, sticky="ew")
 
-        title_label = tk.Label(title_frame, text="Cafe Kiosk", font=("Arial", 24, "bold"), bg="#4a7abc", fg="white")
+        title_label = tk.Label(title_frame, text="Cafe Kiosk", font=("SF Pro Display", 28, "bold"), bg="#007AFF", fg="white")
         title_label.grid(row=0, column=0)
 
         # Menu buttons frame
         menu_frame = tk.Frame(self.root, bg="#f0f0f0", padx=10, pady=10)
         menu_frame.grid(row=1, column=0, sticky="nsew")
 
-        menu_label = tk.Label(menu_frame, text="Menu", font=("Arial", 18, "bold"), bg="#f0f0f0")
+        menu_label = tk.Label(menu_frame, text="Menu", font=("SF Pro Display", 18, "bold"), bg="#f0f0f0", fg="#1d1d1f")  # Apple 다크 그레이
         menu_label.grid(row=0, column=0, columnspan=2, pady=(0, 10))
 
         # Create menu buttons
@@ -207,10 +214,10 @@ class KioskGUI:
             btn = tk.Button(
                 menu_frame,
                 text=f"{drink_name}\n{drink_price} won",
-                font=("Arial", 12),
+                font=("SF Pro Display", 13),
                 width=15,
                 height=3,
-                bg="#e0e0e0",
+                bg="#F5F5F7",  # Apple 라이트 그레이
                 command=lambda idx=i: self.add_to_order(idx)
             )
             btn.grid(row=(i // 2) + 1, column=i % 2, padx=5, pady=5, sticky="nsew")
@@ -219,7 +226,7 @@ class KioskGUI:
         order_frame = tk.Frame(self.root, bg="#f0f0f0", padx=10, pady=10)
         order_frame.grid(row=1, column=1, sticky="nsew")
 
-        order_label = tk.Label(order_frame, text="Current Order", font=("Arial", 18, "bold"), bg="#f0f0f0")
+        order_label = tk.Label(order_frame, text="Current Order", font=("SF Pro Display", 18, "bold"), bg="#f0f0f0", fg="#1d1d1f")
         order_label.grid(row=0, column=0, pady=(0, 10))
 
         # Text widget to display current order
@@ -235,9 +242,9 @@ class KioskGUI:
         complete_btn = tk.Button(
             control_frame,
             text="Complete Order",
-            font=("Arial", 12, "bold"),
-            bg="#4CAF50",
-            fg="white",
+            font=("SF Pro Display", 12, "bold"),
+            bg="#E8E8E8",  # 밝은 회색 배경
+            fg="#1d1d1f",  # Apple 다크 그레이 텍스트
             padx=10,
             pady=5,
             command=self.complete_order
@@ -248,9 +255,9 @@ class KioskGUI:
         reset_btn = tk.Button(
             control_frame,
             text="Reset Order",
-            font=("Arial", 12, "bold"),
-            bg="#f44336",
-            fg="white",
+            font=("SF Pro Display", 12, "bold"),
+            bg="#E8E8E8",  # 밝은 회색 배경
+            fg="#1d1d1f",  # Apple 다크 그레이 텍스트
             padx=10,
             pady=5,
             command=self.reset_order
@@ -261,9 +268,9 @@ class KioskGUI:
         exit_btn = tk.Button(
             control_frame,
             text="Exit",
-            font=("Arial", 12, "bold"),
-            bg="#607D8B",
-            fg="white",
+            font=("SF Pro Display", 12, "bold"),
+            bg="#E8E8E8",  # 밝은 회색 배경
+            fg="#1d1d1f",  # Apple 다크 그레이 텍스트
             padx=10,
             pady=5,
             command=self.exit_program
@@ -274,8 +281,9 @@ class KioskGUI:
         self.weather_label = tk.Label(
             self.root,
             text="Loading weather information...",
-            font=("Arial", 12),
-            bg="#f0f0f0"
+            font=("SF Pro Display", 12),
+            bg="#f0f0f0",
+            fg="#1d1d1f"  # Apple 다크 그레이
         )
         self.weather_label.grid(row=3, column=0, columnspan=2, pady=5)
 
@@ -284,24 +292,24 @@ class KioskGUI:
         self.root.grid_columnconfigure(0, weight=1)
         self.root.grid_columnconfigure(1, weight=1)
 
-    def update_weather_info(self) -> None:
-        """ Load weather data from 'wttr.in'"""
-        # url = "https://wttr.in/incheon?&0&Q"
-        # url = "https://wttr.in/incheon?format=4"  # ok
-        # url = "https://naver.com/kim"  # 404
-        url = "https://wttr123.in/incheon?format=4"  # exception occur
-        # url = "https://www.nate.com"
-        try:
-            response = requests.get(url)  # exception occur
-            weather_text = response.text.strip()
-            if response.status_code == 200:
-                self.weather_label.config(text=f"Current weather ({weather_text})")
-            else:
-                self.weather_label.config(text=f"Weather information cannot be loaded. (Status code : {response.status_code})")
-        except Exception as err:
-            self.weather_label.config(text=f"Weather information error\n{err}")
-            # messagebox.showerror("Error", f"Weather information error\n{err}")
-            # print(err)
+    # def update_weather_info(self) -> None:
+    #     """ Load weather data from 'wttr.in'"""
+    #     # url = "https://wttr.in/incheon?&0&Q"
+    #     url = "https://wttr.in/incheon?format=2"  # ok
+    #     # url = "https://naver.com/kim"  # 404
+    #     # url = "https://wttr123.in/incheon?format=4"  # exception occur
+    #     # url = "https://www.nate.com"
+    #     try:
+    #         response = requests.get(url)  # exception occur
+    #         weather_text = response.text.strip()
+    #         if response.status_code == 200:
+    #             self.weather_label.config(text=f"Current weather ({weather_text})")
+    #         else:
+    #             self.weather_label.config(text=f"Weather information cannot be loaded. (Status code : {response.status_code})")
+    #     except Exception as err:
+    #         self.weather_label.config(text=f"Weather information error\n{err}")
+    #         # messagebox.showerror("Error", f"Weather information error\n{err}")
+    #         # print(err)
 
     def add_to_order(self, idx: int) -> None:
         """
@@ -310,7 +318,7 @@ class KioskGUI:
         """
         self.order_processor.process_order(idx)
         self.update_order_display()
-        self.update_weather_info()  # Load weather data
+        # self.update_weather_info()  # Load weather data
 
     def update_order_display(self) -> None:
         """Update the order summary in the text widget"""
@@ -369,10 +377,10 @@ class KioskGUI:
         receipt_frame = tk.Frame(receipt_window, padx=20, pady=20)
         receipt_frame.pack(fill=tk.BOTH, expand=True)
 
-        tk.Label(receipt_frame, text="RECEIPT", font=("Arial", 18, "bold")).pack(pady=(0, 10))
+        tk.Label(receipt_frame, text="RECEIPT", font=("SF Pro Display", 18, "bold")).pack(pady=(0, 10))
 
         # Receipt text
-        receipt_area = tk.Text(receipt_frame, font=("Courier", 10), width=60, height=20)
+        receipt_area = tk.Text(receipt_frame, font=("SF Pro Text", 13), width=60, height=20)
         receipt_area.pack(pady=10)
         receipt_area.insert(tk.END, receipt_text)
         receipt_area.insert(tk.END, f"\nQueue number ticket: {queue_number}")
@@ -382,7 +390,9 @@ class KioskGUI:
         tk.Button(
             receipt_frame,
             text="Close Receipt",
-            font=("Arial", 12),
+            font=("SF Pro Display", 12),
+            bg="#007AFF",  # Apple 블루
+            fg="white",
             command=lambda: [receipt_window.destroy(), self.reset_order()]
         ).pack(pady=10)
 
